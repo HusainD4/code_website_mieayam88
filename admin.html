@@ -28,9 +28,9 @@
                     <th>Address</th>
                     <th>Phone</th>
                     <th>Order Type</th>
-                    <th>Payment Status</th>
                     <th>Payment Method</th>
                     <th>Total Price</th>
+                    <th>Payment Status</th>
                 </tr>
             </thead>
             <tbody id="orders-body">
@@ -39,29 +39,45 @@
     </div>
 
     <script>
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        const orders = JSON.parse(localStorage.getItem('orders')) || [];
-        const ordersBody = document.getElementById('orders-body');
+        document.addEventListener('DOMContentLoaded', () => {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const ordersBody = document.getElementById('orders-body');
 
-        orders.forEach(order => {
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${order.orderId}</td>
-                <td>${order.customer}</td>
-                <td>${order.items.map(item => `${item.product} (${item.quantity})`).join(', ')}</td>
-                <td>${order.dateTime}</td>
-                <td>${order.address}</td>
-                <td>${order.phone}</td>
-                <td>${order.type}</td>
-                <td>${order.paymentStatus}</td>
-                <td>${order.paymentMethod}</td>
-                <td>Rp${order.totalPrice.toLocaleString()}</td>
-            `;
-            ordersBody.appendChild(newRow);
+            orders.forEach(order => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${order.orderId}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `${item.product} (${item.quantity})`).join(', ')}</td>
+                    <td>${order.dateTime}</td>
+                    <td>${order.address}</td>
+                    <td>${order.phone}</td>
+                    <td>${order.type}</td>
+                    <td>${order.paymentMethod}</td>
+                    <td>Rp${order.totalPrice.toLocaleString()}</td>
+                    <td>
+                        ${order.paymentMethod === 'TUNAI' ? 'TUNAI' : ''}
+                        ${order.paymentMethod === 'COD' ? `
+                        <select onchange="updatePaymentStatus(this.value, '${order.orderId}')">
+                        <option value="Belum Bayar" ${order.paymentStatus === 'Belum Bayar' ? 'selected' : ''}>Belum Bayar</option>
+                        <option value="Sudah Bayar" ${order.paymentStatus === 'Sudah Bayar' ? 'selected' : ''}>Sudah Bayar</option>
+                        </select>
+                    </td>
+` : ''}
+
+                `;
+                ordersBody.appendChild(newRow);
+            });
         });
-    });
 
+        function updatePaymentStatus(status, orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const orderIndex = orders.findIndex(order => order.orderId === orderId);
+            if (orderIndex !== -1) {
+                orders[orderIndex].paymentStatus = status;
+                localStorage.setItem('orders', JSON.stringify(orders));
+            }
+        }
     </script>
 </body>
 </html>
